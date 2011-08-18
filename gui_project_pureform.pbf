@@ -1,0 +1,9 @@
+PureFORM_Project_Begin
+Project¶gui_project_pureform
+SaveAsCode¶puredentica_main.pb
+Window¶1¶#winMain¶349110272$¶#PB_Window_SystemMenu|#PB_Window_SizeGadget|#PB_Window_MinimizeGadget|#PB_Window_TitleBar|#PB_Window_MaximizeGadget|#PB_Window_Invisible¶Puredentica¶522¶115¶497¶565¶0¶10¶10¶0¶5000¶5000¶0¶-1¶0¶¶¶
+PanelGadget¶2*¶#Panel1¶1¶-1¶-1¶0¶0¶19¶0¶0¶¶¶¶-1¶0¶¶¶0¶0¶1¶1¶2¶0¶0¶500¶510¶0¶0¶0¶0¶0¶0·0·0·0·0·0·0¶0¶-1¶-1¶-1¶-1¶Dents¸¸0¶0¶¶0¶0
+ScrollAreaGadget¶3*¶#scrDents¶1¶2¶19¶1¶0¶21¶0¶4¶#PB_ScrollArea_Single¶¶¶-1¶0¶490¶950¶490¶950¶1¶0¶0¶0¶5¶495¶481¶0¶0¶0¶0¶0¶0·0·0·0·0·0·0¶0¶-1¶-1¶-1¶-1¶¶0¶¶0¶0
+StringGadget¶4*¶#strPost¶1¶-1¶-1¶0¶0¶25¶0¶0¶¶¶¶-1¶0¶¶¶0¶0¶0¶0¶0¶0¶510¶465¶55¶0¶0¶0¶0¶0¶0·0·0·0·0·0·0¶0¶-1¶-1¶-1¶-1¶¶0¶¶0¶0
+ButtonGadget¶5*¶#bnPost¶1¶-1¶-1¶0¶0¶0¶0¶1¶#PB_Button_Default¶Post¶¶-1¶0¶¶¶0¶0¶0¶0¶0¶465¶510¶33¶55¶0¶0¶0¶0¶0¶0·0·0·0·0·0·0¶0¶-1¶-1¶-1¶-1¶¶0¶¶0¶0
+PureFORM_Project_End
