@@ -357,7 +357,10 @@ Procedure.s postDent(*u.UIStatus, statusText.s, latitude.f = 0, longitude.f = 0)
   ;http://status.net/wiki/HOWTO_Use_the_API
   ;username:password http://example.com/api/statuses/update.xml -d status='Howdy!' -d lat='30.468' -d long='-94.743' 
   ;#####################################################
-  
+  ; this does not work.  try this:
+  ;   http://www.purebasic.fr/english/viewtopic.php?f=13&t=43786&hilit=curl
+  ; libcurl on windows would be an easy solution.
+  ;
   Protected url.s = "http://" + *u\apiPath + "/api/"
   Protected of.s = GetTemporaryDirectory() + App\title + "_" + now() + ".xml"
   
