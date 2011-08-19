@@ -40,8 +40,6 @@ Enumeration ;dent elements
 EndEnumeration
 ;}
 
-
-
 Structure UIStatus
   prevTab.i
   currentTab.i
@@ -205,7 +203,7 @@ Procedure.i OpenWindow_winMain()
   Protected scrAreaHeight.i = 945
   Protected scrStep.i       = 10
   
-  If OpenWindow(#winMain, 522, 115, 497, 565, "Puredentica", #PB_Window_SystemMenu|#PB_Window_SizeGadget|#PB_Window_MinimizeGadget|#PB_Window_TitleBar|#PB_Window_MaximizeGadget|#PB_Window_Invisible)
+  If OpenWindow(#winMain, 522, 115, 497, 565, "PureDent", #PB_Window_SystemMenu|#PB_Window_SizeGadget|#PB_Window_MinimizeGadget|#PB_Window_TitleBar|#PB_Window_MaximizeGadget|#PB_Window_Invisible)
     SmartWindowRefresh(#winMain, #True)
     StringGadget(#strPost,0,WindowHeight(#winMain) - 55,WindowWidth(#winMain) * 0.8,55,"") ;0, 510, 465, 55, "")
     ButtonGadget(#bnPost, 465, 510, 33, 55, "Post", #PB_Button_Default)
