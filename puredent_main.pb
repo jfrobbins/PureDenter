@@ -19,7 +19,12 @@
 ;     You should have received a copy of the GNU Lesser General Public License
 ;     along With PureDent.  If Not, see <http://www.gnu.org/licenses/>.
 ; ====================================================================
+; This code is hosted here on github: 
+;   https://github.com/jfrobbins/PureDent
 ;
+; The programming language used is PureBasic, vist purebasic.com for more info.
+;   It is not a free or opensource compiler.
+; ====================================================================
 ; StatusNet api:
 ;   http://status.net/docs/api/statusesupdate.html
 ; ====================================================================
