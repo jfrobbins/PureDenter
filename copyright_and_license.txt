@@ -1,0 +1,27 @@
+; ====================================================================
+; PureDent
+;   author: @jrobb
+;   Copyright 2011 Jon Robbins
+;
+; StatusNet api:
+;   http://status.net/docs/api/statusesupdate.html
+;
+; ====================================================================
+;     This file is part of PureDent.
+; 
+;     PureDent is free software: you can redistribute it And/Or modify
+;     it under the terms of the GNU Lesser General Public License As published by
+;     the Free Software Foundation, either version 3 of the License, Or
+;     (at your option) any later version.
+; 
+;     PureDent is distributed IN the hope that it will be useful,
+;     but WITHOUT ANY WARRANTY; without even the implied warranty of
+;     MERCHANTABILITY Or FITNESS For A PARTICULAR PURPOSE.  See the
+;     GNU Lesser General Public License For more details.
+; 
+;     You should have received a copy of the GNU Lesser General Public License
+;     along With PureDent.  If Not, see <http://www.gnu.org/licenses/>.
+; ====================================================================
+; XInclude("COPYING")
+; XInclude("COPYING.LESSER")
+; ====================================================================
