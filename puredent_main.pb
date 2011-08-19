@@ -1,10 +1,33 @@
-;{- Enumerations / DataSections
-;{ Windows
+; ====================================================================
+; PureDent
+;   author: @jrobb
+;   Copyright 2011 Jon Robbins
+;
+; ====================================================================
+;     This file is part of PureDent.
+; 
+;     PureDent is free software: you can redistribute it And/Or modify
+;     it under the terms of the GNU Lesser General Public License As published by
+;     the Free Software Foundation, either version 3 of the License, Or
+;     (at your option) any later version.
+; 
+;     PureDent is distributed IN the hope that it will be useful,
+;     but WITHOUT ANY WARRANTY; without even the implied warranty of
+;     MERCHANTABILITY Or FITNESS For A PARTICULAR PURPOSE.  See the
+;     GNU Lesser General Public License For more details.
+; 
+;     You should have received a copy of the GNU Lesser General Public License
+;     along With PureDent.  If Not, see <http://www.gnu.org/licenses/>.
+; ====================================================================
+;
+; StatusNet api:
+;   http://status.net/docs/api/statusesupdate.html
+; ====================================================================
 Enumeration
   #winMain
 EndEnumeration
-;}
-;{ Gadgets
+
+;- Gadgets
 Enumeration
   #Panel1
   #scrDents
@@ -13,7 +36,6 @@ Enumeration
   #strPost
   #bnPost
 EndEnumeration
-;}
 
 ;- Tab Enumeration
 Enumeration
@@ -38,16 +60,33 @@ Enumeration ;dent elements
   #dent_BNcontext
   #dent_BNreply
 EndEnumeration
-;}
+
+;-===
+;- Constants
+#nNull = -999.000000000001
+
+;-===
+;- Structures
+; ===
+Structure AppType
+  title.s
+  
+  vMajor.i
+  vMinor.i
+  vRev.i
+  
+  description.s
+EndStructure
 
 Structure UIStatus
   prevTab.i
   currentTab.i
+  
+  uname.s
+  pw.s
+  
+  apiPath.s ;identi.ca
 EndStructure
-Global UIS.UIStatus
-
-;- Global Vars
-Global gblPanelSwitch.i
 
 Structure gadgetInfo
   name.i ;dent element
@@ -84,8 +123,37 @@ Structure DentInfo
   id.i
   List gList.gadgetInfo()
 EndStructure
+
+;-===
+;- Global Vars
+Global App.AppType
+Global UIS.UIStatus
+Global gblPanelSwitch.i
 Global NewList Dents.DentInfo()
 
+;-=======
+;- App Info
+; =======
+With App
+  \title = "PureDent"
+  \description = "PureDent is an identi.ca/StatusNET client...not a sugarfree gum."
+  
+  ;-=====
+  ;-Versioning
+  ; =====
+  \vMajor   = 0
+  \vMinor   = 0
+  \vRev     = 1
+EndWith
+
+;-=====
+;- Includes
+XIncludeFile "common.pb"
+
+
+;-=======
+;- Procedures
+;-
 Procedure.i getGadgetParams(List g.gadgetInfo(), defaultX.i=0, defaultY.i=0, defaultW.i=0, defaultH.i=0)
   If IsGadget(g()\id ) = 0
     ProcedureReturn 0
@@ -278,6 +346,35 @@ Procedure TabChange(forceTab.i = -1)
   Delay(1)
 EndProcedure
 
+Procedure.s postDent(*u.UIStatus, statusText.s, latitude.f = 0, longitude.f = 0)
+  ;Returns the path of the server response stored locally. Needed for XML parsing.
+  ;
+  ;http://status.net/wiki/HOWTO_Use_the_API
+  ;username:password http://example.com/api/statuses/update.xml -d status='Howdy!' -d lat='30.468' -d long='-94.743' 
+  ;#####################################################
+  
+  Protected url.s = "http://" + *u\apiPath + "/api/"
+  Protected of.s = GetTemporaryDirectory() + App\title + "_" + now() + ".xml"
+  
+  ;#####################################################
+  
+  SetURLPart(url, #PB_URL_User, *u\uname)
+  SetURLPart(url, #PB_URL_Password, *u\pw)
+ 
+  url + "statuses/update.xml -d status='" + statusText + "'"
+  url + " -d source='" + App\title + "'"
+  
+  If latitude And longitude
+    url + " -d lat='" + StrF(latitude) + "' -d long='" + StrF(longitude) + "'"
+  EndIf
+
+  
+  If ReceiveHTTPFile(url, of)
+    ProcedureReturn of
+  Else
+    ProcedureReturn #NUL$
+  EndIf
+EndProcedure
 
 Procedure main()
   If Not OpenWindow_winMain()
