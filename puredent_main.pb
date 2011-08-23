@@ -351,6 +351,29 @@ Procedure TabChange(forceTab.i = -1)
   Delay(1)
 EndProcedure
 
+Procedure.s getStatuses()
+;   //retrieve statuses from service.
+; 	//	this is hardcoded For now, As it is just a TEST using libsoup
+; 	//	of course will allow variables of all these things, all user-settable And such
+; 	//
+	Protected.s username  = "jrobb";
+	Protected.s site		  = "http://" + "identi.ca" + "/api";
+	Protected.i count     = 20;
+	Protected.i lastID     = 0;
+	Protected of.s = GetTemporaryDirectory() + App\title + "_" + now() + ".xml"
+	
+	Protected url.s = site + "/statuses/friends_timeline/" + username + ".xml?count=" + Str(count) 
+	If lastID
+	  url + "&since_id=" + Str(lastID)
+	EndIf
+	
+	If ReceiveHTTPFile(url, of)
+    ProcedureReturn of
+  Else
+    ProcedureReturn #NUL$
+  EndIf
+EndProcedure
+
 Procedure.s postDent(*u.UIStatus, statusText.s, latitude.f = 0, longitude.f = 0)
   ;Returns the path of the server response stored locally. Needed for XML parsing.
   ;
@@ -389,6 +412,7 @@ Procedure main()
     MessageRequester("Error","Could not open main window")
     End
   EndIf
+  InitNetwork()
   
   Repeat
     Select WaitWindowEvent()
@@ -399,6 +423,8 @@ Procedure main()
     Case #PB_Event_Gadget
       Select EventGadget()
       Case #Panel1                   : Panel_Event(EventType(), gblPanelSwitch)  
+      Case #bnPost
+        Debug getStatuses() ;test
       EndSelect
     EndSelect
   ForEver
