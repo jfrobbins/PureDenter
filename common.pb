@@ -1,5 +1,5 @@
 ; ====================================================================
-; PureDent
+; PureDenter
 ;   author: @jrobb
 ;   Copyright 2011 Jon Robbins
 ;
@@ -53,4 +53,16 @@ Procedure.s Now(mode.s = "TSTAMP")
     mode = FormatDate("%yyyy",Date())
     ProcedureReturn MidFast(mode,3,2) + FormatDate("%mm%DD%hh%ii%ss",Date()) 
   EndSelect  
+EndProcedure
+
+
+;-========
+;- Base Functions
+;-========
+Procedure.s b64encode(strToEncode.s, bufLen.i = 1024)
+  Protected encoded.s = Space(bufLen)
+ 
+  Base64Encoder(@strToEncode, StringByteLength(strToEncode), @encoded, bufLen)
+  
+  ProcedureReturn encoded
 EndProcedure
