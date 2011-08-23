@@ -28,6 +28,9 @@
 ; StatusNet api:
 ;   http://status.net/docs/api/statusesupdate.html
 ; ====================================================================
+
+XIncludeFile "curl.pbi" ;we need libcurl!
+
 Enumeration
   #winMain
 EndEnumeration
@@ -89,8 +92,12 @@ Structure UIStatus
   
   uname.s
   pw.s
+  authHdr.s
   
   apiPath.s ;identi.ca
+  
+  lastID.i
+  nNotices.i
 EndStructure
 
 Structure gadgetInfo
@@ -351,18 +358,51 @@ Procedure TabChange(forceTab.i = -1)
   Delay(1)
 EndProcedure
 
-Procedure.s getStatuses()
+Procedure.s getAuthString(name.s, password.s)
+  Protected authS.s
+  Protected len.i = 1024
+  Protected encodedAuth.s = Space(len)
+  
+  authS = name + ":" + password
+  Base64Encoder(@authS, StringByteLength(authS), @encodedAuth, len)
+  
+  ProcedureReturn "Basic " + encodedAuth
+EndProcedure
+
+Procedure.i loadSettings(*u.UIStatus)
+  *u\uname    = "jrobb";
+	*u\pw       = ""
+	*u\authHdr  = getAuthString(*u\uname, *u\pw)
+	
+	*u\apiPath  = "https://" + "identi.ca" + "/api";
+	*u\nNotices = 20;
+	*u\lastID   = 0;
+EndProcedure
+
+Procedure verifyCredentials(*u.UIStatus)
+  Protected url.s = *u\apiPath + "/account/verify_credentials.xml"
+  url = SetURLPart(url,#PB_URL_User,*u\uname)
+  url = SetURLPart(url,#PB_URL_Password,*u\pw)
+  
+  Protected vFile.s = GetTemporaryDirectory() + "verify" + now() + ".xml"
+  If ReceiveHTTPFile(url,vFile)
+    DeleteFile(vFile)
+    ProcedureReturn 1
+  Else
+    ProcedureReturn 0
+  EndIf
+EndProcedure
+
+Procedure.s getStatuses(*u.UIStatus)
 ;   //retrieve statuses from service.
 ; 	//	this is hardcoded For now, As it is just a TEST using libsoup
 ; 	//	of course will allow variables of all these things, all user-settable And such
-; 	//
-	Protected.s username  = "jrobb";
-	Protected.s site		  = "http://" + "identi.ca" + "/api";
-	Protected.i count     = 20;
-	Protected.i lastID     = 0;
+; 	//	
 	Protected of.s = GetTemporaryDirectory() + App\title + "_" + now() + ".xml"
 	
-	Protected url.s = site + "/statuses/friends_timeline/" + username + ".xml?count=" + Str(count) 
+	Protected cID.i
+	
+	Protected url.s = *u\apiPath + "/statuses/friends_timeline/" + *u\uname + ".xml?count=" + Str(*u\nNotices) 
 	If lastID
 	  url + "&since_id=" + Str(lastID)
 	EndIf
@@ -398,7 +438,6 @@ Procedure.s postDent(*u.UIStatus, statusText.s, latitude.f = 0, longitude.f = 0)
   If latitude And longitude
     url + " -d lat='" + StrF(latitude) + "' -d long='" + StrF(longitude) + "'"
   EndIf
-
   
   If ReceiveHTTPFile(url, of)
     ProcedureReturn of
@@ -413,6 +452,7 @@ Procedure main()
     End
   EndIf
   InitNetwork()
+  loadSettings(UIS)
   
   Repeat
     Select WaitWindowEvent()
@@ -424,7 +464,7 @@ Procedure main()
       Select EventGadget()
       Case #Panel1                   : Panel_Event(EventType(), gblPanelSwitch)  
       Case #bnPost
-        Debug getStatuses() ;test
+        Debug getStatuses(UIS) ;test
       EndSelect
     EndSelect
   ForEver
