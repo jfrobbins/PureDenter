@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://www.purebasic.com/namespace" version="1.0" creator="PureBasic 4.60 Beta 3 (Windows - x86)">
+  <section name="config">
+    <options closefiles="1" openmode="0" name="PureDenter"/>
+  </section>
+  <section name="data">
+    <explorer view="" pattern="0"/>
+    <log show="1"/>
+    <lastopen date="2011-08-30 23:56" user="JRobbins" host="JROBBINSX200W7"/>
+  </section>
+  <section name="files">
+    <file name="common.pb">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
+      <fingerprint md5="e1df96d2a947d7e65aed50931ccf8019"/>
+    </file>
+    <file name="puredent_main.pb">
+      <config load="1" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
+      <fingerprint md5="10669e40adaea36d08fb400dbd600ab2"/>
+    </file>
+    <file name="RW_LibCurl_inc.pb">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
+      <fingerprint md5="8c139a456d08ab1da0305f73def0bd38"/>
+    </file>
+    <file name="RW_LibCurl_Res.pb">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
+      <fingerprint md5="564fb764810359f7cddb222db73fee28"/>
+    </file>
+    <file name="curl.pbi">
+      <config load="0" scan="1" panel="1" warn="1" lastopen="1" panelstate="+"/>
+      <fingerprint md5="dc5afc0e130a577f7d7e7fb90c08435a"/>
+    </file>
+  </section>
+  <section name="targets">
+    <target name="Default Target" enabled="1" default="1">
+      <inputfile value="puredent_main.pb"/>
+      <outputfile value="exe\puredenter.exe"/>
+      <directory value="exe\"/>
+      <options asm="1" xpskin="1" onerror="1" debug="1"/>
+      <temporaryexe value="source"/>
+      <buildcount enable="1" value="0"/>
+      <execonstant enable="1"/>
+    </target>
+  </section>
+</project>

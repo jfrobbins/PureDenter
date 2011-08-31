@@ -66,3 +66,11 @@ Procedure.s b64encode(strToEncode.s, bufLen.i = 1024)
   
   ProcedureReturn encoded
 EndProcedure
+
+Procedure.s b64decode(strToDecode.s, bufLen.i = 1024)
+  Protected decoded.s = Space(bufLen)
+ 
+  Base64Decoder(@strToDecode, StringByteLength(strToDecode), @decoded, bufLen)
+  
+  ProcedureReturn decoded
+EndProcedure

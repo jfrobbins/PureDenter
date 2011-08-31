@@ -28,8 +28,8 @@
 ; StatusNet api:
 ;   http://status.net/docs/api/statusesupdate.html
 ; ====================================================================
-
-XIncludeFile "curl.pbi" ;we need libcurl!
+XIncludeFile "RW_LibCurl_Res.pb"
+XIncludeFile "RW_LibCurl_inc.pb" ;we need libcurl!
 
 Enumeration
   #winMain
@@ -98,6 +98,8 @@ Structure UIStatus
   
   lastID.i
   nNotices.i
+  
+  configPath.s
 EndStructure
 
 Structure gadgetInfo
@@ -147,8 +149,9 @@ Global NewList Dents.DentInfo()
 ;- App Info
 ; =======
 With App
-  \title = "PureDent"
-  \description = "PureDent is an identi.ca/StatusNET client...not a sugarfree gum."
+  \title = "api"
+  ;\title = "PureDenter"
+  \description = \title + " is an identi.ca/StatusNET client...not a sugarfree gum."
   
   ;-=====
   ;-Versioning
@@ -166,6 +169,11 @@ XIncludeFile "common.pb"
 ;-=======
 ;- Procedures
 ;-
+Macro GetEXEpath()
+  ;returns the path to where the EXE is running from
+  GetPathPart(ProgramFilename())
+EndMacro
+
 Procedure.i getGadgetParams(List g.gadgetInfo(), defaultX.i=0, defaultY.i=0, defaultW.i=0, defaultH.i=0)
   If IsGadget(g()\id ) = 0
     ProcedureReturn 0
@@ -358,25 +366,46 @@ Procedure TabChange(forceTab.i = -1)
   Delay(1)
 EndProcedure
 
-Procedure.s getAuthString(name.s, password.s)
+Procedure.s getAuthString(name.s, password.s, encode.i = #False)
   Protected authS.s
   Protected len.i = 1024
   Protected encodedAuth.s = Space(len)
   
   authS = name + ":" + password
-  Base64Encoder(@authS, StringByteLength(authS), @encodedAuth, len)
+  If encode
+    Base64Encoder(@authS, StringByteLength(authS), @encodedAuth, len)
+    ProcedureReturn encodedAuth
+  EndIf
   
-  ProcedureReturn "Basic " + encodedAuth
+  ProcedureReturn authS
 EndProcedure
 
 Procedure.i loadSettings(*u.UIStatus)
-  *u\uname    = "jrobb";
-	*u\pw       = ""
-	*u\authHdr  = getAuthString(*u\uname, *u\pw)
-	
-	*u\apiPath  = "https://" + "identi.ca" + "/api";
-	*u\nNotices = 20;
-	*u\lastID   = 0;
+  If Not *u\configPath
+    *u\configPath = GetEXEpath() + "/puredenter.conf"
+  EndIf
+  OpenPreferences(*u\configPath)  
+    *u\uname  = ReadPreferenceString("username","username")   
+  	*u\pw     = b64decode(ReadPreferenceString("password","password")) ;simple encoded
+  	*u\authHdr  = getAuthString(*u\uname, *u\pw,#False)
+  	
+  	*u\apiPath  = ReadPreferenceString("apipath","https://" + "identi.ca" + "/api")
+  	*u\nNotices = ReadPreferenceInteger("nNoticesToFetch",20)
+  	*u\lastID   = 0;
+	ClosePreferences()
+EndProcedure
+
+Procedure.i saveSettings(*u.UIStatus)
+  If Not *u\configPath
+    *u\configPath = GetEXEpath() + "/puredenter.conf"
+  EndIf
+  OpenPreferences(*u\configPath)  
+    WritePreferenceString("username",*u\uname)   
+  	WritePreferenceString("password",b64encode(*u\pw)) ;simple encoded
+ 	  
+  	WritePreferenceString("apipath",*u\apiPath)
+  	WritePreferenceInteger("nNoticesToFetch",*u\nNotices)
+	ClosePreferences()
 EndProcedure
 
 Procedure verifyCredentials(*u.UIStatus)
@@ -391,6 +420,21 @@ Procedure verifyCredentials(*u.UIStatus)
   Else
     ProcedureReturn 0
   EndIf
+EndProcedure
+
+Procedure.s verifyApiPath(url.s)  
+	If GetURLPart(URL$, #PB_URL_Protocol) = "http"
+	  url = SetURLPart(URL$, #PB_URL_Protocol, "https")
+	ElseIf Left(url,4) <> "http"
+	  url = "https://" + url	  
+	EndIf
+	If Right(url,1) <> "/"
+	  url + "/"
+	EndIf
+	If Right(url,4) <> "api/"
+	  url + "api/"
+	EndIf
+	ProcedureReturn url
 EndProcedure
 
 Procedure.s getStatuses(*u.UIStatus)
@@ -424,26 +468,45 @@ Procedure.s postDent(*u.UIStatus, statusText.s, latitude.f = 0, longitude.f = 0)
   ;   http://www.purebasic.fr/english/viewtopic.php?f=13&t=43786&hilit=curl
   ; libcurl on windows would be an easy solution.
   ;
-  Protected url.s = "http://" + *u\apiPath + "/api/"
-  Protected of.s = GetTemporaryDirectory() + App\title + "_" + now() + ".xml"
-  
+  Protected url.s
+  Protected update.s
+  Protected loginpwd.s = getAuthString(*u\uname,*u\pw,#False)
+  Protected err.l
   ;#####################################################
-  
-  SetURLPart(url, #PB_URL_User, *u\uname)
-  SetURLPart(url, #PB_URL_Password, *u\pw)
- 
-  url + "statuses/update.xml -d status='" + statusText + "'"
-  url + " -d source='" + App\title + "'"
-  
-  If latitude And longitude
-    url + " -d lat='" + StrF(latitude) + "' -d long='" + StrF(longitude) + "'"
-  EndIf
-  
-  If ReceiveHTTPFile(url, of)
-    ProcedureReturn of
-  Else
-    ProcedureReturn #NUL$
-  EndIf
+  Protected curl.i  = curl_easy_init()	
+	If Not curl
+	  Debug "could not connect to curl"
+	  ProcedureReturn ""
+	EndIf
+	
+	*u\apiPath = verifyApiPath(*u\apiPath)
+	url = *u\apiPath + "statuses/update.xml"
+	Debug url
+	
+	curl_easy_setopt(curl, #CURLOPT_URL, @url)		
+	curl_easy_setopt(curl, #CURLOPT_USERPWD, @loginpwd)
+	
+	update = "status=" + statusText
+	curl_easy_setopt(curl, #CURLOPT_POSTFIELDS, @update)
+	
+;   update = "source=" + App\title
+;   curl_easy_setopt(curl, #CURLOPT_POSTFIELDS, @update)
+;   
+;   If latitude And longitude
+;     update = "lat=" + StrF(latitude) 
+;     curl_easy_setopt(curl, #CURLOPT_POSTFIELDS, @update)
+;     
+;     update = "long=" + StrF(longitude)
+;     curl_easy_setopt(curl, #CURLOPT_POSTFIELDS, @update)
+;   EndIf
+	curl_easy_setopt(curl, #CURLOPT_WRITEFUNCTION, @RW_LibCurl_WriteFunction())
+	
+	curl_easy_perform(curl)
+	curl_easy_strerror(@err)
+	If err
+	  Debug err
+	EndIf
+	curl_easy_cleanup(curl)   
 EndProcedure
 
 Procedure main()
@@ -464,11 +527,11 @@ Procedure main()
       Select EventGadget()
       Case #Panel1                   : Panel_Event(EventType(), gblPanelSwitch)  
       Case #bnPost
-        Debug getStatuses(UIS) ;test
+        postDent(UIS,GetGadgetText(#strPost))
       EndSelect
     EndSelect
   ForEver
-
+  saveSettings(UIS)
   End
 EndProcedure
 

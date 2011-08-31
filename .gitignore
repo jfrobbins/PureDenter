@@ -1,1 +1,6 @@
 *.cfg
+*.conf
+curl.pbi
+curl/
+*.pbp
+
